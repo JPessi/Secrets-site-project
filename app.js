@@ -72,13 +72,9 @@ app
   .get(function (req, res) {
     res.render("login");
   })
-  .post(
-    passport.authenticate("local"),
-
-    function (req, res) {
-      res.redirect("/secrets");
-    }
-  );
+  .post(passport.authenticate("local"), function (req, res) {
+    res.redirect("/secrets");
+  });
 
 app
   .route("/register")
