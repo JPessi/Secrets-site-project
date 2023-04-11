@@ -7,7 +7,7 @@ const session = require("express-session");
 const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
-const FacebookStrategy = require("passport-facebook");
+const FacebookStrategy = require("passport-facebook").Strategy;
 const findOrCreate = require("mongoose-findorcreate");
 
 const app = express();
@@ -81,7 +81,7 @@ passport.use(
     {
       clientID: process.env.FB_APPID,
       clientSecret: process.env.FB_SECRET,
-      callbackURL: "http://localhost:3000/auth/facebook/callback",
+      callbackURL: "http://localhost:3000/auth/facebook/secrets",
     },
     function (accessToken, refreshToken, profile, cb) {
       User.findOrCreate({ facebookId: profile.id }, function (err, user) {
@@ -120,7 +120,7 @@ app
 app.route("/auth/facebook").get(passport.authenticate("facebook"));
 
 app
-  .route("/auth/facebook/callback")
+  .route("/auth/facebook/secrets")
   .get(
     passport.authenticate("facebook", { failureRedirect: "/login" }),
     function (req, res) {
