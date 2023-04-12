@@ -36,6 +36,7 @@ const userSchema = new mongoose.Schema({
   password: String,
   googleId: String,
   facebookId: String,
+  secret: String,
 });
 
 userSchema.plugin(passportLocalMongoose);
@@ -129,13 +130,43 @@ app
     }
   );
 
+// Finds all secrets submitted by users. (Users where submitted secret is not equal to null.)
 app.route("/secrets").get(function (req, res) {
-  if (req.isAuthenticated()) {
-    res.render("secrets");
-  } else {
-    res.redirect("/login");
-  }
+  User.find({ secret: { $ne: null } })
+    .then(function (foundUser) {
+      if (foundUser) {
+        res.render("secrets", { usersWithSecrets: foundUser });
+      }
+    })
+    .catch(function (err) {
+      console.log(err);
+    });
 });
+
+app
+  .route("/submit")
+  .get(function (req, res) {
+    if (req.isAuthenticated()) {
+      res.render("submit");
+    } else {
+      res.redirect("/login");
+    }
+  })
+  .post(function (req, res) {
+    const submittedSecret = req.body.secret;
+    User.findById(req.user.id)
+      .then(function (foundUser) {
+        if (foundUser) {
+          foundUser.secret = submittedSecret;
+          foundUser.save().then(function () {
+            res.redirect("/secrets");
+          });
+        }
+      })
+      .catch(function (err) {
+        console.log(err);
+      });
+  });
 
 app.route("/logout").get(function (req, res) {
   req.logout(function (err) {
